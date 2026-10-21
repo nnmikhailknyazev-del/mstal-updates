@@ -1,0 +1,39 @@
+name: Publish signed update
+on:
+  push:
+    paths:
+      - '.github/workflows/publish-initial.yml'
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify signed distribution
+        env:
+          DIST_URL: "https://sdmntprnortheu.oaiusercontent.com/files/00000000-2f3c-81f4-9046-883a4fa60a76/raw?se=2026-10-21T18%3A18%3A42Z&sp=r&sv=2026-02-06&sr=b&scid=26872194-29a6-45a0-ac6d-827b2c1f9e51&skoid=db055408-822b-485f-92f8-bfeb3ea92408&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-21T03%3A14%3A06Z&ske=2026-10-22T03%3A14%3A06Z&sks=b&skv=2026-02-06&sig=QRnqLotlMYNloKmz8k5lp%2Bz%2Bah/9BIlmhflbK0cHzIg%3D"
+        run: |
+          python3 - <<'PY'
+          import os,urllib.request,zipfile,io,json,hashlib
+          from pathlib import Path
+          data=urllib.request.urlopen(os.environ['DIST_URL'],timeout=60).read()
+          with zipfile.ZipFile(io.BytesIO(data)) as z:
+              apk=z.read('M-stal-Calculator.apk')
+              manifest=z.read('update.json')
+          meta=json.loads(manifest)
+          assert meta['versionCode']==2
+          assert meta['sha256']=='4410c0823e40029bb1fb23c578bc896ee45d92e54a5fd926b856d1602893318b'
+          assert hashlib.sha256(apk).hexdigest()==meta['sha256']
+          assert meta['apkUrl']=='https://raw.githubusercontent.com/nnmikhailknyazev-del/mstal-updates/main/M-stal-Calculator.apk'
+          Path('M-stal-Calculator.apk').write_bytes(apk)
+          Path('update.json').write_bytes(manifest)
+          PY
+      - name: Publish APK and version information together
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add M-stal-Calculator.apk update.json
+          git commit -m "Publish signed calculator 0.2.0"
+          git push
