@@ -1,0 +1,46 @@
+name: Refresh 52les wood prices
+on:
+  schedule:
+    - cron: '27 3 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/wood_parser.py'
+      - 'scripts/refresh_wood.py'
+      - '.github/workflows/refresh-wood-prices.yml'
+permissions:
+  contents: write
+concurrency:
+  group: supplier-wood-prices
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF parsers
+        run: pip -q install pypdf==5.9.0 pdfplumber==0.11.7
+      - name: Fetch and validate supplier price
+        run: python scripts/refresh_wood.py
+      - name: Publish snapshot or failure status
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add prices/wood.json prices/wood-status.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh daily 52les wood price snapshot"
+            git pull --rebase origin main
+            git push
+          fi
+      - name: Report supplier refresh failure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          state=json.loads(Path('prices/wood-status.json').read_text())
+          assert state['success'], state.get('error','Supplier refresh failed')
+          PY
