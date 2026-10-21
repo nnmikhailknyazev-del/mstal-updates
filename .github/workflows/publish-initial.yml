@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Download and verify signed distribution
         env:
-          DIST_URL: "https://sdmntpreastus.oaiusercontent.com/files/00000000-c804-81f9-adc3-bf9690e95bb4/raw?se=2026-10-21T18%3A34%3A50Z&sp=r&sv=2026-02-06&sr=b&scid=8c1dab1e-8074-42c4-b1c9-bee07cf0418a&skoid=db055408-822b-485f-92f8-bfeb3ea92408&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-21T12%3A04%3A55Z&ske=2026-10-22T12%3A04%3A55Z&sks=b&skv=2026-02-06&sig=ml6ihZwiJ7E0n1JsxRlR1GGJkLP60AxMyUBO3qSVWXQ%3D"
+          DIST_URL: "https://sdmntprsoutheastus3.oaiusercontent.com/files/00000000-2e4c-820c-ab98-e561383a68c7/raw?se=2026-10-21T18%3A46%3A38Z&sp=r&sv=2026-02-06&sr=b&scid=14c72040-48e6-49f9-855a-1588f7950d34&skoid=db055408-822b-485f-92f8-bfeb3ea92408&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-10-21T15%3A16%3A00Z&ske=2026-10-22T15%3A16%3A00Z&sks=b&skv=2026-02-06&sig=EEp3YulV71PQEBEUzGRZigOxrVFWs9laLHi5nxpz4Hw%3D"
         run: |
           python3 - <<'PY'
           import os,urllib.request,zipfile,io,json,hashlib
@@ -23,7 +23,7 @@ jobs:
               apk=z.read('M-stal-Calculator.apk')
               manifest=z.read('update.json')
           meta=json.loads(manifest)
-          assert meta['versionCode']==3
+          assert meta['versionCode']==4
           assert len(meta['sha256'])==64
           assert hashlib.sha256(apk).hexdigest()==meta['sha256']
           assert meta['apkUrl']=='https://raw.githubusercontent.com/nnmikhailknyazev-del/mstal-updates/main/M-stal-Calculator.apk'
@@ -35,5 +35,5 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add M-stal-Calculator.apk update.json
-          git commit -m "Publish signed calculator 0.3.0"
+          git commit -m "Publish signed calculator 0.3.1"
           git push
