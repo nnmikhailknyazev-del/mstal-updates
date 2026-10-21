@@ -1,0 +1,46 @@
+name: Refresh supplier metal prices
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/shery_parser.py'
+      - 'scripts/refresh_shery.py'
+      - '.github/workflows/refresh-metal-prices.yml'
+permissions:
+  contents: write
+concurrency:
+  group: supplier-metal-prices
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF parser
+        run: pip -q install pypdf==5.9.0
+      - name: Fetch and validate supplier price
+        run: python scripts/refresh_shery.py
+      - name: Publish snapshot or failure status
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add prices/
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh daily Shery metal price snapshot"
+            git pull --rebase origin main
+            git push
+          fi
+      - name: Report supplier refresh failure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          state=json.loads(Path('prices/shery-status.json').read_text())
+          assert state['success'], state.get('error','Supplier refresh failed')
+          PY
