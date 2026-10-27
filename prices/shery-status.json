@@ -1,6 +1,6 @@
 {
-  "success": true,
-  "attemptedAt": "2026-10-26T08:54:07.457336+00:00",
+  "success": false,
+  "attemptedAt": "2026-10-27T08:58:53.367425+00:00",
   "sourceUrl": "https://shery.ru/upload/medialibrary/b7b/76qni8a3gvvw4pfrq5h1pys4twuc4we4.pdf",
-  "materialCount": 74
+  "error": "Не удалось получить или проверить прайс поставщика. Сохранена последняя успешная версия."
 }
