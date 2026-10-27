@@ -1,6 +1,7 @@
 {
-  "success": false,
-  "attemptedAt": "2026-10-26T09:08:35.455269+00:00",
+  "success": true,
+  "attemptedAt": "2026-10-27T09:10:09.487366+00:00",
   "sourceUrl": "https://www.52les.ru/images/price/price-list.pdf",
-  "error": "Не удалось получить или проверить прайс 52ЛЕС. Сохранена последняя успешная версия."
+  "materialCount": 458,
+  "supplierDate": "12.09.2026"
 }
